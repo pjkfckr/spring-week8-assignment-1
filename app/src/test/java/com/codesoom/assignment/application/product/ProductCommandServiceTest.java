@@ -1,0 +1,72 @@
+package com.codesoom.assignment.application.product;
+
+import com.codesoom.assignment.domain.Product;
+import com.codesoom.assignment.domain.ProductRepository;
+import com.codesoom.assignment.dto.ProductDto;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest
+@DisplayName("ProductCommandService 에서")
+class ProductCommandServiceTest {
+    private static final String PRODUCT_NAME = "상품1";
+    private static final String PRODUCT_MAKER = "메이커1";
+    private static final Integer PRODUCT_PRICE = 100000;
+    private static final String PRODUCT_IMAGE_URL = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F9941A1385B99240D2E";
+
+    private static final String UPDATE_PRODUCT_NAME = "상품1000";
+    private static final Integer UPDATE_PRODUCT_PRICE = 100;
+
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private ProductCommandService productCommandService;
+
+    /**
+     * 하나의 Product 를 생성해 등록
+     *
+     * @return 생성한 Product를 리턴
+     */
+    private Product createProduct() {
+        ProductDto productDto = ProductDto
+                .builder()
+                .name(PRODUCT_NAME)
+                .maker(PRODUCT_MAKER)
+                .price(PRODUCT_PRICE)
+                .imageUrl(PRODUCT_IMAGE_URL)
+                .build();
+        return productCommandService.create(productDto);
+    }
+
+    @Nested
+    @DisplayName("create 메소드는")
+    class Describe_of_create {
+
+        @Nested
+        @DisplayName("생성할 수 있는 제품의 데이터가 주어지면")
+        class Context_with_create_product {
+            private final ProductDto productDto = ProductDto
+                    .builder()
+                    .name(PRODUCT_NAME)
+                    .maker(PRODUCT_MAKER)
+                    .price(PRODUCT_PRICE)
+                    .imageUrl(PRODUCT_IMAGE_URL)
+                    .build();
+
+
+            @Test
+            @DisplayName("제품을 생성하고, 생성된 제품을 반환한다")
+            void it_return_created_product() {
+                Product product = productCommandService.create(productDto);
+
+                assertThat(product).isNotNull();
+            }
+        }
+    }
+}

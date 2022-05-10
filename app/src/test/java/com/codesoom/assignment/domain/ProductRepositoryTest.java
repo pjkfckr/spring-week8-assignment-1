@@ -21,6 +21,11 @@ class ProductRepositoryTest {
     private static final Integer PRODUCT_PRICE = 100000;
     private static final String PRODUCT_IMAGE_URL = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F9941A1385B99240D2E";
 
+    private static final Integer UPDATE_PRODUCT_PRICE = 700;
+    private static final String UPDATE_PRODUCT_NAME = "상품100";
+    private static final String UPDATE_PRODUCT_MAKER = "maker100";
+    private static final String UPDATE_PRODUCT_IMAGE_URL = "changedImageUrl";
+
     @Autowired
     private ProductRepository productRepository;
 
@@ -132,6 +137,63 @@ class ProductRepositoryTest {
                 Product product = productRepository.findById(productId)
                         .orElseThrow(() -> new ProductNotFoundException(productId));
                 assertThat(product).isNotNull();
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("save 메소드는")
+    class Describe_save_of_product {
+
+        @Nested
+        @DisplayName("제품을 생성할 객체가 주어지면")
+        class Context_with_create_of_product {
+            private Product product;
+
+            @BeforeEach
+            void setUp() {
+                product = Product.of(
+                        PRODUCT_NAME,
+                        PRODUCT_MAKER,
+                        PRODUCT_PRICE,
+                        PRODUCT_IMAGE_URL
+                );
+            }
+
+            @Test
+            @DisplayName("제품을 생성하고, 생성된 제품을 리턴한다")
+            void it_return_new_product() {
+                Product createdProduct = productRepository.save(product);
+
+                assertThat(createdProduct).isNotNull();
+                assertThat(createdProduct.getPrice()).isEqualTo(PRODUCT_PRICE);
+            }
+        }
+
+        @Nested
+        @DisplayName("제품을 업데이트 할 객체가 주어지면")
+        class Context_with_update_of_product {
+            private Product product;
+
+            @BeforeEach
+            void setUp() {
+                product = createProduct();
+                product.change(
+                        UPDATE_PRODUCT_NAME,
+                        UPDATE_PRODUCT_MAKER,
+                        UPDATE_PRODUCT_PRICE,
+                        UPDATE_PRODUCT_IMAGE_URL
+                );
+            }
+
+            @Test
+            @DisplayName("제품을 업데이트하고, 업데이트한 객체를 리턴한다")
+            void it_return_updated_product() {
+                Product updatedProduct = productRepository.save(product);
+
+                assertThat(updatedProduct).isNotNull();
+                assertThat(updatedProduct.getId()).isEqualTo(product.getId());
+                assertThat(updatedProduct.getName()).isEqualTo(UPDATE_PRODUCT_NAME);
             }
         }
     }

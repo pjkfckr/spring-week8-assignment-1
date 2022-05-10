@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -262,6 +263,54 @@ class ProductControllerWebTest {
                 mockMvc.perform(patch("/products/{id}", productId)
                                 .contentType(APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(productData)))
+                        .andExpect(status().isNotFound());
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("DELETE - /products/{id}")
+    class Describe_of_delete_product {
+        private Product product;
+
+        @BeforeEach
+        void setUp() {
+            product = createProduct();
+        }
+
+        @Nested
+        @DisplayName("삭제할 수 있는 제품의 id가 주어지면")
+        class Context_with_valid_id {
+            private Long productId;
+
+            @BeforeEach
+            void setUp() {
+                productId = product.getId();
+            }
+
+            @Test
+            @DisplayName("제품을 삭제후 상태코드 204로 응답한다")
+            void it_delete_product_by_id() throws Exception {
+                mockMvc.perform(delete("/products/{id}", productId))
+                        .andExpect(status().isNoContent());
+            }
+        }
+
+        @Nested
+        @DisplayName("삭제할 수 없는 제품의 id가 주어지면")
+        class Context_with_invalid_id {
+            private Long productId;
+
+            @BeforeEach
+            void setUp() {
+                productId = product.getId();
+                productRepository.deleteById(productId);
+            }
+
+            @Test
+            @DisplayName("상태코드 404로 응답한다")
+            void it_throw_not_found() throws Exception {
+                mockMvc.perform(delete("/products/{id}", productId))
                         .andExpect(status().isNotFound());
             }
         }

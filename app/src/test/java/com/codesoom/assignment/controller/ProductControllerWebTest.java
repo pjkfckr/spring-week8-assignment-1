@@ -21,6 +21,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,6 +35,9 @@ class ProductControllerWebTest {
     private static final String PRODUCT_MAKER = "메이커1";
     private static final Integer PRODUCT_PRICE = 100000;
     private static final String PRODUCT_IMAGE_URL = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F9941A1385B99240D2E";
+
+    private static final String UPDATE_PRODUCT_NAME = "상품1000";
+    private static final Integer UPDATE_PRODUCT_PRICE = 100;
 
     @Autowired
     private MockMvc mockMvc;
@@ -194,4 +198,72 @@ class ProductControllerWebTest {
         }
     }
 
+    @Nested
+    @DisplayName("PATCH - /products/{id}")
+    class Describe_of_patch {
+        private Product product;
+
+        @BeforeEach
+        void setUp() {
+            product = createProduct();
+        }
+
+        @Nested
+        @DisplayName("업데이트할 수 있는 제품의 id 와 업데이트할 정보가 주어지면")
+        class Context_with_valid_id {
+            private Long productId;
+            private final ProductDto productData = ProductDto
+                    .builder()
+                    .name(UPDATE_PRODUCT_NAME)
+                    .maker(PRODUCT_MAKER)
+                    .price(UPDATE_PRODUCT_PRICE)
+                    .imageUrl(PRODUCT_IMAGE_URL)
+                    .build();
+
+            @BeforeEach
+            void setUp() {
+                productId = product.getId();
+            }
+
+            @Test
+            @DisplayName("제품을 수정하고 수정된 제품을 포함하여 응답한다")
+            void it_return_updated_product() throws Exception {
+                mockMvc.perform(patch("/products/{id}", productId)
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(productData)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("id").exists())
+                        .andExpect(jsonPath("name").exists())
+                        .andExpect(jsonPath("price").exists())
+                        .andExpect(jsonPath("imageUrl").exists());
+            }
+        }
+
+        @Nested
+        @DisplayName("업데이트할 수 없는 제품의 id가 주어지면")
+        class Context_with_invalid_id {
+            private Long productId;
+            private final ProductDto productData = ProductDto
+                    .builder()
+                    .name(PRODUCT_NAME)
+                    .maker(PRODUCT_MAKER)
+                    .price(PRODUCT_PRICE)
+                    .build();
+
+            @BeforeEach
+            void setUp() {
+                productId = product.getId();
+                productRepository.deleteById(productId);
+            }
+
+            @Test
+            @DisplayName("404 에러를 던진다")
+            void it_throw_not_found() throws Exception {
+                mockMvc.perform(patch("/products/{id}", productId)
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(productData)))
+                        .andExpect(status().isNotFound());
+            }
+        }
+    }
 }

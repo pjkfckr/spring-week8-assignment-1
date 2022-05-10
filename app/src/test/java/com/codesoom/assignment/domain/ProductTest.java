@@ -12,9 +12,13 @@ class ProductTest {
     private static final String PRODUCT_MAKER = "maker";
     private static final String PRODUCT_IMAGE_URL = "imageUrl";
 
+    private static final Integer CHANGE_PRODUCT_PRICE = 700;
+    private static final String CHANGE_PRODUCT_NAME = "상품100";
+    private static final String CHANGE_PRODUCT_MAKER = "maker100";
+    private static final String CHANGE_PRODUCT_IMAGE_URL = "changedImageUrl";
 
     @Test
-    @DisplayName("of() 메소드를 사용하여 Product를 생성할 때")
+    @DisplayName("of() 메소드를 사용하여 Product를 생성")
     void creationWithBuilder() {
         Product product = Product.of(
                 PRODUCT_NAME,
@@ -29,4 +33,26 @@ class ProductTest {
         assertThat(product.getImageUrl()).isEqualTo(PRODUCT_IMAGE_URL);
     }
 
+    @Test
+    @DisplayName("chnage 메소드로 데이터를 변경")
+    void change() {
+        Product product = Product.of(
+                PRODUCT_NAME,
+                PRODUCT_MAKER,
+                PRODUCT_PRICE,
+                PRODUCT_IMAGE_URL
+        );
+
+        product.change(
+                CHANGE_PRODUCT_NAME,
+                CHANGE_PRODUCT_MAKER,
+                CHANGE_PRODUCT_PRICE,
+                CHANGE_PRODUCT_IMAGE_URL
+        );
+
+        assertThat(product.getName()).isEqualTo(CHANGE_PRODUCT_NAME);
+        assertThat(product.getMaker()).isEqualTo(CHANGE_PRODUCT_MAKER);
+        assertThat(product.getPrice()).isEqualTo(CHANGE_PRODUCT_PRICE);
+        assertThat(product.getImageUrl()).isEqualTo(CHANGE_PRODUCT_IMAGE_URL);
+    }
 }

@@ -42,6 +42,16 @@ public class Product {
         return new Product(name, maker, price, imageUrl);
     }
 
+    public void change(String name,
+                       String maker,
+                       Integer price,
+                       String imageUrl) {
+        this.name = name;
+        this.maker = maker;
+        this.price = price;
+        this.imageUrl = imageUrl;
+    }
+
     @Override
     public String toString() {
         return String.format(

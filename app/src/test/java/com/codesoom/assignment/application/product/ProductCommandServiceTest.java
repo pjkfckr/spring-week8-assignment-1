@@ -126,4 +126,57 @@ class ProductCommandServiceTest {
             }
         }
     }
+
+    @Nested
+    @DisplayName("deleteById 메소드는")
+    class Describe_of_delete {
+
+        @Nested
+        @DisplayName("삭제할 수 있는 제품이 주어지면")
+        class Context_with_valid_product {
+            private Long productId;
+
+            @BeforeEach
+            void setUp() {
+                Product product = createProduct();
+                productId = product.getId();
+            }
+
+            @Test
+            @DisplayName("상품을 삭제한다")
+            void it_delete_product() {
+                productCommandService.deleteById(productId);
+
+                assertThatThrownBy(
+                        () -> productRepository.findById(productId).orElseThrow(
+                                () -> new ProductNotFoundException(productId)
+                        ))
+                        .isInstanceOf(ProductNotFoundException.class);
+            }
+        }
+
+        @Nested
+        @DisplayName("삭제할 수 없는 제품이 주어지면")
+        class Context_with_invalid_product {
+            private Long productId;
+
+            @BeforeEach
+            void setUp() {
+                Product product = createProduct();
+                productId = product.getId();
+
+                productCommandService.deleteById(productId);
+            }
+
+            @Test
+            @DisplayName("ProductNotFoundException을 던진다")
+            void it_throw_productNotFoundException() {
+                assertThatThrownBy(
+                        () -> productRepository.findById(productId).orElseThrow(
+                                () -> new ProductNotFoundException(productId)
+                        ))
+                        .isInstanceOf(ProductNotFoundException.class);
+            }
+        }
+    }
 }

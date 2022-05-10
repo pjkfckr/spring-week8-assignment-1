@@ -3,6 +3,8 @@ package com.codesoom.assignment.application.product;
 import com.codesoom.assignment.domain.Product;
 import com.codesoom.assignment.domain.ProductRepository;
 import com.codesoom.assignment.dto.ProductDto;
+import com.codesoom.assignment.exceptions.ProductNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -66,6 +69,60 @@ class ProductCommandServiceTest {
                 Product product = productCommandService.create(productDto);
 
                 assertThat(product).isNotNull();
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("save 메소드는")
+    class Describre_of_save {
+        private final ProductDto updateDto = ProductDto
+                .builder()
+                .name(UPDATE_PRODUCT_NAME)
+                .maker(PRODUCT_MAKER)
+                .price(UPDATE_PRODUCT_PRICE)
+                .imageUrl(PRODUCT_IMAGE_URL)
+                .build();
+
+        @Nested
+        @DisplayName("업데이트할 수 있는 제품의 id와 데이터가 주어지면")
+        class Context_with_valid_id {
+            private Long productId;
+
+            @BeforeEach
+            void setUp() {
+                Product product = createProduct();
+                productId = product.getId();
+            }
+
+            @Test
+            @DisplayName("제품을 수정하고, 수정한 제품을 반환한다")
+            void it_update_and_return_product() {
+                Product product = productCommandService.save(productId, updateDto);
+
+                assertThat(product).isNotNull();
+                assertThat(product.getName()).isEqualTo(UPDATE_PRODUCT_NAME);
+                assertThat(product.getPrice()).isEqualTo(UPDATE_PRODUCT_PRICE);
+            }
+        }
+
+        @Nested
+        @DisplayName("업데이트할 수 없는 제품의 id가 주어지면")
+        class Context_with_invalid_id {
+            private Long productId;
+
+            @BeforeEach
+            void setUp() {
+                Product product = createProduct();
+                productId = product.getId();
+                productCommandService.deleteById(productId);
+            }
+
+            @Test
+            @DisplayName("ProductNotFoundException을 던진다")
+            void it_throw_productNotFoundException() {
+                assertThatThrownBy(() -> productCommandService.save(productId, updateDto))
+                        .isInstanceOf(ProductNotFoundException.class);
             }
         }
     }

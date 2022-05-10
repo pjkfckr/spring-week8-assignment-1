@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -106,6 +107,58 @@ class ProductControllerWebTest {
                         .andExpect(status().isOk())
                         .andExpect(content()
                                 .string(StringContains.containsString("[]")));
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("GET - /products/{id}")
+    class Describe_of_detail_product {
+        private Product product;
+
+        @BeforeEach
+        void setUp() {
+            product = createProduct();
+        }
+
+        @Nested
+        @DisplayName("조회할수 있는 {id} 가 주어지면")
+        class Context_with_product {
+            private long productId;
+
+            @BeforeEach
+            void setUp() {
+                productId = product.getId();
+            }
+
+            @Test
+            @DisplayName("{id}와 동일한 Product를 보여준다")
+            void it_return_product() throws Exception {
+                mockMvc.perform(get("/products/" + productId))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("id").exists())
+                        .andExpect(jsonPath("name").exists())
+                        .andExpect(jsonPath("price").exists())
+                        .andExpect(jsonPath("imageUrl").exists());
+            }
+        }
+
+        @Nested
+        @DisplayName("조회할수 없는 {id} 가 주어지면")
+        class Context_without_product {
+            private long productId;
+
+            @BeforeEach
+            void setUp() {
+                productId = product.getId();
+                productRepository.delete(product);
+            }
+
+            @Test
+            @DisplayName("404 에러를 던진다")
+            void it_throw_productNotFoundException() throws Exception {
+                mockMvc.perform(get("/products/{id}", productId))
+                        .andExpect(status().isNotFound());
             }
         }
     }

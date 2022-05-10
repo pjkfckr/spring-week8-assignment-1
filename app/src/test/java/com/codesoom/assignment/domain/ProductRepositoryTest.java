@@ -197,4 +197,30 @@ class ProductRepositoryTest {
             }
         }
     }
+
+    @Nested
+    @DisplayName("delete 는")
+    class Describe_delete_of_product {
+
+        @Nested
+        @DisplayName("삭제할 수 있는 상품이 주어지면")
+        class Context_with_delete_of_product {
+            private Product createdProduct;
+
+            @BeforeEach
+            void setUp() {
+                createdProduct = createProduct();
+            }
+
+            @Test
+            @DisplayName("상품을 삭제하고, 삭제되었는지 확인한다")
+            void it_delete_product() {
+                productRepository.delete(createdProduct);
+
+                Optional<Product> deletedProduct = productRepository.findById(createdProduct.getId());
+
+                assertThat(deletedProduct).isEmpty();
+            }
+        }
+    }
 }

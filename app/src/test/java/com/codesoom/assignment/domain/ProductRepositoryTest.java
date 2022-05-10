@@ -1,5 +1,6 @@
 package com.codesoom.assignment.domain;
 
+import com.codesoom.assignment.exceptions.ProductNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -112,6 +113,25 @@ class ProductRepositoryTest {
                 Optional<Product> product = productRepository.findById(productId);
 
                 assertThat(product).isEmpty();
+            }
+        }
+
+        @Nested
+        @DisplayName("찾을 수 있는 객체의 Id 가 주어지면")
+        class Context_with_product {
+            private long productId;
+
+            @BeforeEach
+            void setUp() {
+                productId = product.getId();
+            }
+
+            @Test
+            @DisplayName("Id와 동일한 객체를 리턴한다")
+            void it_return_product() {
+                Product product = productRepository.findById(productId)
+                        .orElseThrow(() -> new ProductNotFoundException(productId));
+                assertThat(product).isNotNull();
             }
         }
     }

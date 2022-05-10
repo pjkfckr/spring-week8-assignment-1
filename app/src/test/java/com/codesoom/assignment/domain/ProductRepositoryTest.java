@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -83,5 +84,37 @@ class ProductRepositoryTest {
             }
         }
     }
+
+    @Nested
+    @DisplayName("findById 메소드는")
+    class Describe_read_of_product {
+        private Product product;
+
+        @BeforeEach
+        void setUp() {
+            product = createProduct();
+        }
+
+        @Nested
+        @DisplayName("찾을 수 없는 객체의 Id 가 주어지면")
+        class Context_without_product {
+            private Long productId;
+
+            @BeforeEach
+            void setUp() {
+                productId = product.getId();
+                productRepository.deleteById(productId);
+            }
+
+            @Test
+            @DisplayName("비어있는 객체가 반환된다")
+            void it_throw_productNotFoundException() {
+                Optional<Product> product = productRepository.findById(productId);
+
+                assertThat(product).isEmpty();
+            }
+        }
+    }
+
 
 }
